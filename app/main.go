@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/iarie/rechallenge/data"
 	"github.com/iarie/rechallenge/internal"
 )
 
@@ -41,7 +42,13 @@ func postOrderHandler(p internal.Packer) func(w http.ResponseWriter, r *http.Req
 		}
 
 		// Process
-		o := p.Pack(qty)
+		pkg_50 := data.Package{Sku: "xxxx0200", Size: 50}
+		pkg_100 := data.Package{Sku: "xxxx0200", Size: 100}
+		inventory := []data.Package{
+			pkg_50,
+			pkg_100,
+		}
+		o := p.Pack(qty, inventory)
 
 		tmpl := template.Must(template.ParseFiles("templates/order.html"))
 		tmpl.Execute(w, o)

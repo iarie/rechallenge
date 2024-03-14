@@ -47,7 +47,7 @@ func UsePacker(v string) ConfigOption {
 	return func(c *Config) { c.Packer = internal.PackerFunc(fn) }
 }
 
-func getPackerFuncByVersion(v string) func(int) data.Order {
+func getPackerFuncByVersion(v string) func(int, []data.Package) data.Order {
 	switch v {
 	case "V1":
 		return internal.PackerV1

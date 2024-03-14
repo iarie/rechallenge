@@ -19,3 +19,8 @@
 
 # Go workspace file
 go.work
+node_modules
+package.json
+package-lock.json
+tailwind.config.js
+input.css

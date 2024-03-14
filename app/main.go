@@ -5,26 +5,17 @@ import (
 	"html/template"
 	"log"
 	"net/http"
+	"strconv"
+
+	"github.com/iarie/rechallenge/internal"
 )
-
-type Config struct {
-	port int
-}
-
-func NewConfig(port int) *Config {
-	return &Config{port: port}
-}
-
-func (ac *Config) Addr() string {
-	return fmt.Sprintf(":%v", ac.port)
-}
 
 func Run(cfg *Config) {
 	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
 
 	http.HandleFunc("/", indexHandler)
 
-	http.HandleFunc("/solve/", solveHandler)
+	http.HandleFunc("/place-order/", postOrderHandler(cfg.Packer))
 
 	log.Fatal(http.ListenAndServe(cfg.Addr(), nil))
 }
@@ -35,14 +26,31 @@ func indexHandler(w http.ResponseWriter, r *http.Request) {
 	tmpl.Execute(w, nil)
 }
 
-func solveHandler(w http.ResponseWriter, r *http.Request) {
-	r.ParseForm()
+func postOrderHandler(p internal.Packer) func(w http.ResponseWriter, r *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
+		log.Println("postOrderHandler")
 
-	qty := r.PostForm.Get("qty")
+		// Validate
+		r.ParseForm()
 
+		// string to int
+		qty, err := strconv.Atoi(r.PostForm.Get("qty"))
+		if err != nil {
+			renderError(err, w)
+			return
+		}
+
+		// Process
+		o := p.Pack(qty)
+
+		tmpl := template.Must(template.ParseFiles("templates/order.html"))
+		tmpl.Execute(w, o)
+	}
+}
+
+func renderError(err error, w http.ResponseWriter) {
+	log.Println("Error: ", err)
 	tmpl := template.New("t")
-	tmpl.Parse("<li>1 - 250</li><li>2 - 250</li><li>3 - 250</li>")
-	tmpl.Execute(w, nil)
-
-	log.Printf("SOLVE: %v", qty)
+	tmpl.Parse(fmt.Sprintf("Error: %v", err.Error()))
+	tmpl.Execute(w, err)
 }

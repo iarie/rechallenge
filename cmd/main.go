@@ -5,10 +5,10 @@ import (
 )
 
 func main() {
-	// load config
-	cfg := app.NewConfig(8080)
-	// init store
-	// start web server
+	cfg := app.NewConfig(
+		app.UsePort(8080),
+		app.UsePacker("V1"),
+	)
 
 	app.Run(cfg)
 }

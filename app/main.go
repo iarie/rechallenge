@@ -22,6 +22,10 @@ func Run(cfg *Config) {
 
 func indexHandler(inventoryRepo internal.Repository) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Cache-Control", "no-cache, no-store, must-revalidate;")
+		w.Header().Set("pragma", "no-cache")
+		w.Header().Set("X-Content-Type-Options", "nosniff")
+
 		tmpl := template.Must(template.ParseFiles("index.html"))
 		tmpl.Execute(w, inventoryRepo.Get())
 	}

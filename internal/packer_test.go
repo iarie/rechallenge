@@ -29,29 +29,34 @@ func TestPackerV1_Required(t *testing.T) {
 		qty         int
 		expectation data.Order
 	}{
-		{0, data.Order{}},
+		{0, data.Order{Requested: 0}},
 		{1, data.Order{
+			Requested: 1,
 			LineItems: []data.LineItem{
 				{Package: pack250, Qty: 1},
 			},
 		}},
 		{250, data.Order{
+			Requested: 250,
 			LineItems: []data.LineItem{
 				{Package: pack250, Qty: 1},
 			},
 		}},
 		{251, data.Order{
+			Requested: 251,
 			LineItems: []data.LineItem{
 				{Package: pack500, Qty: 1},
 			},
 		}},
 		{501, data.Order{
+			Requested: 501,
 			LineItems: []data.LineItem{
 				{Package: pack500, Qty: 1},
 				{Package: pack250, Qty: 1},
 			},
 		}},
 		{12001, data.Order{
+			Requested: 12001,
 			LineItems: []data.LineItem{
 				{Package: pack5000, Qty: 2},
 				{Package: pack2000, Qty: 1},
@@ -86,8 +91,9 @@ func TestPackerV1_Custom(t *testing.T) {
 		qty         int
 		expectation data.Order
 	}{
-		{0, data.Order{}},
+		{0, data.Order{Requested: 0}},
 		{15, data.Order{
+			Requested: 15,
 			LineItems: []data.LineItem{
 				{Package: pack10, Qty: 1},
 				{Package: pack5, Qty: 1},

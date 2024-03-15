@@ -21,19 +21,14 @@
                         <th>Pack Size</th>
                       </tr>
                     </thead>
+
                     <tbody>
+                      {{ range . }}
                       <tr>
-                        <td class="border border-slate-100">AXXX0200</td>
-                        <td class="border border-slate-100">200</td>
+                        <td class="border border-slate-100">{{ .Sku }}</td>
+                        <td class="border border-slate-100">{{ .Size }}</td>
                       </tr>
-                      <tr>
-                        <td class="border border-slate-100">AXXX0500</td>
-                        <td class="border border-slate-100">500</td>
-                      </tr>
-                      <tr>
-                        <td class="border border-slate-100">AXXX1000</td>
-                        <td class="border border-slate-100">1000</td>
-                      </tr>
+                      {{ end }}
                     </tbody>
                   </table>
             </div>

@@ -13,8 +13,9 @@ const (
 )
 
 type Config struct {
-	Port   int
-	Packer internal.Packer
+	Port          int
+	Packer        internal.Packer
+	InventoryRepo internal.Repository
 }
 
 func (ac *Config) Addr() string {
@@ -45,6 +46,10 @@ func UsePacker(v string) ConfigOption {
 	fn := getPackerFuncByVersion(v)
 
 	return func(c *Config) { c.Packer = internal.PackerFunc(fn) }
+}
+
+func UseInventoryRepo(r internal.Repository) ConfigOption {
+	return func(c *Config) { c.InventoryRepo = r }
 }
 
 func getPackerFuncByVersion(v string) func(int, []data.Package) data.Order {

@@ -7,27 +7,27 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/iarie/rechallenge/data"
 	"github.com/iarie/rechallenge/internal"
 )
 
 func Run(cfg *Config) {
 	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
 
-	http.HandleFunc("/", indexHandler)
+	http.HandleFunc("/", indexHandler(cfg.InventoryRepo))
 
-	http.HandleFunc("/place-order/", postOrderHandler(cfg.Packer))
+	http.HandleFunc("/place-order/", postOrderHandler(cfg.Packer, cfg.InventoryRepo))
 
 	log.Fatal(http.ListenAndServe(cfg.Addr(), nil))
 }
 
-func indexHandler(w http.ResponseWriter, r *http.Request) {
-	tmpl := template.Must(template.ParseFiles("index.html"))
-
-	tmpl.Execute(w, nil)
+func indexHandler(inventoryRepo internal.Repository) func(w http.ResponseWriter, r *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
+		tmpl := template.Must(template.ParseFiles("index.html"))
+		tmpl.Execute(w, inventoryRepo.Get())
+	}
 }
 
-func postOrderHandler(p internal.Packer) func(w http.ResponseWriter, r *http.Request) {
+func postOrderHandler(p internal.Packer, inventoryRepo internal.Repository) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		log.Println("postOrderHandler")
 
@@ -41,14 +41,7 @@ func postOrderHandler(p internal.Packer) func(w http.ResponseWriter, r *http.Req
 			return
 		}
 
-		// Process
-		pkg_50 := data.Package{Sku: "xxxx0200", Size: 50}
-		pkg_100 := data.Package{Sku: "xxxx0200", Size: 100}
-		inventory := []data.Package{
-			pkg_50,
-			pkg_100,
-		}
-		o := p.Pack(qty, inventory)
+		o := p.Pack(qty, inventoryRepo.Get())
 
 		tmpl := template.Must(template.ParseFiles("templates/order.html"))
 		tmpl.Execute(w, o)

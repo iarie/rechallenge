@@ -34,11 +34,6 @@ func PackerV1(total int, packs []data.Package) data.Order {
 
 	sort.Sort(ByScore(mem))
 
-	// for i, r := range mem {
-	// 	// fmt.Printf("# %v - Items: %v Taget: %v Score: %v\n", i+1, r.Items, r.Target, r.Score)
-	// 	// fmt.Printf("DEBUG: %v\n", r.Debug)
-	// }
-
 	// Build Order
 
 	o.LineItems = append(o.LineItems, mem[0].Items...)
@@ -130,7 +125,6 @@ func (s *Solution) Finalize(debug string) {
 
 func (s *Solution) IsSolved() bool {
 	sc := s.CheckScore()
-	// fmt.Printf("IsSolved: %v | %v\n", sc, sc[0] <= 0)
 	return sc[0] <= 0
 }
 

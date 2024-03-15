@@ -11,3 +11,6 @@ run: build
 	./bin/run
 test:
 	go test ./... -count=1 -v
+
+push-image:
+	./scripts/push_image

@@ -26,3 +26,7 @@ tailwind.config.js
 input.css
 
 bin/
+
+deploy/.terraform
+deploy/.terraform.lock.hcl
+deploy/terraform.*

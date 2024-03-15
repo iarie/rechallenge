@@ -7,7 +7,7 @@ import (
 
 func main() {
 	cfg := app.NewConfig(
-		app.UsePort(8080),
+		app.UsePort(80),
 		app.UsePacker("V1"),
 		app.UseInventoryRepo(&internal.HardcodedInventoryRepo{}),
 	)

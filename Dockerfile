@@ -14,7 +14,7 @@ COPY static/ static/
 COPY templates/ templates/
 COPY index.html index.html
 
-RUN go build -o bin/http cmd/main.go
+RUN GOOS=linux GOARCH=amd64 go build -o bin/http cmd/main.go
 
 FROM alpine:3 as release
 
@@ -26,6 +26,6 @@ COPY --from=builder /app/index.html index.html
 
 RUN apk add libc6-compat
 
-EXPOSE 8080
+EXPOSE 80
 
 CMD ["/app/http"]

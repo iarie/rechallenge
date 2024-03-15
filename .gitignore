@@ -25,4 +25,4 @@ package-lock.json
 tailwind.config.js
 input.css
 
-./bin
+bin/

@@ -1,7 +1,6 @@
 package internal_test
 
 import (
-	"fmt"
 	"reflect"
 	"testing"
 
@@ -57,7 +56,6 @@ func TestPackerV1_Required(t *testing.T) {
 		r := internal.PackerV1(test.qty, inventory)
 
 		eq := reflect.DeepEqual(r, test.expectation)
-		fmt.Printf("eq: %v\n", eq)
 
 		if !eq {
 			t.Errorf("Bad Result [case#%v]: %v. Want: %v", i+1, r, test.expectation)

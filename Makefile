@@ -12,5 +12,9 @@ run: build
 test:
 	go test ./... -count=1 -v
 
+testd:
+	docker build -t redocker_test -f Dockerfile.tests .
+	docker run --rm redocker_test
+
 push-image:
 	./scripts/push_image

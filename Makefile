@@ -10,4 +10,4 @@ build: vet
 run: build
 	./bin/run
 test:
-	go test ./...
+	go test ./... -count=1 -v

@@ -9,3 +9,5 @@ build: vet
 	go build -o bin/run cmd/main.go
 run: build
 	./bin/run
+test:
+	go test ./...

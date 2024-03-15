@@ -41,7 +41,11 @@ func postOrderHandler(p internal.Packer, inventoryRepo internal.Repository) func
 			return
 		}
 
-		o := p.Pack(qty, inventoryRepo.Get())
+		o, err := p.Pack(qty, inventoryRepo.Get())
+		if err != nil {
+			renderError(err, w)
+			return
+		}
 
 		tmpl := template.Must(template.ParseFiles("templates/order.html"))
 		tmpl.Execute(w, o)

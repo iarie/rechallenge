@@ -1,6 +1,7 @@
 package internal
 
 import (
+	"errors"
 	"fmt"
 	"sort"
 
@@ -8,90 +9,86 @@ import (
 )
 
 type Packer interface {
-	Pack(int, []data.Package) data.Order
+	Pack(int, []data.Package) (data.Order, error)
 }
 
-type PackerFunc func(int, []data.Package) data.Order
+type PackerFunc func(int, []data.Package) (data.Order, error)
 
-func (f PackerFunc) Pack(qty int, packs []data.Package) data.Order {
+func (f PackerFunc) Pack(qty int, packs []data.Package) (data.Order, error) {
 	return f(qty, packs)
 }
 
-func PackerV1(total int, packs []data.Package) data.Order {
+func PackerV1(total int, packs []data.Package) (data.Order, error) {
 	o := data.Order{}
 
-	if total == 0 {
-		return o
+	// Simple validations
+	if total < 0 {
+		err := errors.New("negative total value")
+		return o, err
 	}
 
-	// Search for permuations
+	if total == 0 {
+		return o, nil
+	}
 
+	// Shared var to aggregate solutions
 	mem := []Solution{}
+
+	// Initial empty solution
 	start := newSolution([]data.LineItem{}, total)
+
+	// Start search
 	recursionV1(start, total, packs, &mem)
 
 	// Rank results
-
 	sort.Sort(ByScore(mem))
 
-	// Build Order
+	fmt.Println("Permuations:", len(mem))
 
+	// Build Order
 	o.LineItems = append(o.LineItems, mem[0].Items...)
-	return o
+	return o, nil
 }
 
+// Search for permuations
+// Accept rolling solution node, remainder to fullfil, packs to iterate, and memo to store results
 func recursionV1(in Solution, remainder int, packs []data.Package, mem *[]Solution) {
-	if remainder == 0 {
-		return
-	}
-
+	// Algorithm assumes that packs slice is sorted by size (desc)
+	// Start from the biggest pack
 	for i, p := range packs {
+
+		// Calculate how many packs is needed to fulfill an order
+		// Assuming we have unlimited stock, otherwise we can limit q value
 		q := (remainder / p.Size)
 
-		pMax := make([]data.LineItem, len(in.Items))
-		copy(pMax, in.Items)
-		pMax = append(pMax, data.LineItem{Package: p, Qty: q + 1})
-		sMax := newSolution(pMax, in.Target)
-
-		// save permutation
-		if sMax.IsSolved() {
-			debug := fmt.Sprintf("isSolved: %v Target:%v Score:%v", sMax.IsSolved(), sMax.Target, sMax.CheckScore())
-			sMax.Finalize(debug)
-			*mem = append(*mem, sMax)
-		}
-
-		// go to next pack
-		if q == 0 {
-			continue
-		}
-
 		// Check combinations starting with max fulfilling to 0 packs
-		for j := q; j >= 0; j-- {
+		for j := q + 1; j >= 0; j-- {
+			// Spawn new solution branch:
+			// copy rolling line items
 			pNext := make([]data.LineItem, len(in.Items))
 			copy(pNext, in.Items)
 
-			// if j != 0 {
-			pNext = append(pNext, data.LineItem{Package: p, Qty: j})
-			// }
+			// Do not append null package
+			if j != 0 {
+				pNext = append(pNext, data.LineItem{Package: p, Qty: j})
+			}
 
+			// Clone stuct
 			sNext := newSolution(pNext, in.Target)
 
-			fulfilled := p.Size * j
-
+			// Save solved solution & continue
 			if sNext.IsSolved() {
-				debug := fmt.Sprintf("isSolved: %v Target:%v Score:%v", sNext.IsSolved(), sNext.Target, sNext.CheckScore())
-				sNext.Finalize(debug)
+				// call Finalize to assign the Score
+				sNext.Finalize()
 				*mem = append(*mem, sNext)
+
+				continue
 			}
 
-			var newRemainder int
+			// Calculate new remainder
+			newRemainder := remainder - p.Size*j
 
-			if fulfilled != 0 {
-				newRemainder = remainder % fulfilled
-			} else {
-				newRemainder = remainder
-			}
-
+			// Go to next smaller slice: packs[i+1:]
 			recursionV1(sNext, newRemainder, packs[i+1:], mem)
 		}
 	}
@@ -118,9 +115,8 @@ func (s *Solution) CheckScore() [2]int {
 	return getScore(s.Items, s.Target)
 }
 
-func (s *Solution) Finalize(debug string) {
+func (s *Solution) Finalize() {
 	s.Score = getScore(s.Items, s.Target)
-	s.Debug = debug
 }
 
 func (s *Solution) IsSolved() bool {

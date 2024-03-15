@@ -52,7 +52,7 @@ func UseInventoryRepo(r internal.Repository) ConfigOption {
 	return func(c *Config) { c.InventoryRepo = r }
 }
 
-func getPackerFuncByVersion(v string) func(int, []data.Package) data.Order {
+func getPackerFuncByVersion(v string) func(int, []data.Package) (data.Order, error) {
 	switch v {
 	case "V1":
 		return internal.PackerV1

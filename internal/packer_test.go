@@ -8,6 +8,14 @@ import (
 	"github.com/iarie/rechallenge/internal"
 )
 
+func TestPackerV1_Input(t *testing.T) {
+	_, err := internal.PackerV1(-1, []data.Package{})
+
+	if err == nil {
+		t.Errorf("Vaildation Failed")
+	}
+}
+
 func TestPackerV1_Required(t *testing.T) {
 	pack250 := data.Package{Sku: "A", Size: 250}
 	pack500 := data.Package{Sku: "A", Size: 500}
@@ -53,7 +61,11 @@ func TestPackerV1_Required(t *testing.T) {
 	}
 
 	for i, test := range cases {
-		r := internal.PackerV1(test.qty, inventory)
+		r, err := internal.PackerV1(test.qty, inventory)
+
+		if err != nil {
+			t.Errorf("Unexpected Error [case#%v]: %v. Want: %v", i+1, err, test.expectation)
+		}
 
 		eq := reflect.DeepEqual(r, test.expectation)
 
@@ -84,7 +96,11 @@ func TestPackerV1_Custom(t *testing.T) {
 	}
 
 	for i, test := range cases {
-		r := internal.PackerV1(test.qty, inventory)
+		r, err := internal.PackerV1(test.qty, inventory)
+
+		if err != nil {
+			t.Errorf("Unexpected Error [case#%v]: %v. Want: %v", i+1, err, test.expectation)
+		}
 
 		eq := reflect.DeepEqual(r, test.expectation)
 

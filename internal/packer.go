@@ -19,7 +19,7 @@ func (f PackerFunc) Pack(qty int, packs []data.Package) (data.Order, error) {
 }
 
 func PackerV1(total int, packs []data.Package) (data.Order, error) {
-	o := data.Order{}
+	o := data.Order{Requested: total}
 
 	// Simple validations
 	if total < 0 {

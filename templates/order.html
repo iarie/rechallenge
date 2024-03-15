@@ -1,3 +1,10 @@
-{{range .LineItems}}
-<li>{{ .Qty}} - {{ .Size }}</li>
-{{end}}
+<p>Items requested: {{ .Requested }}</p>
+
+{{ if .NotEmpty }}
+    <p>Fulfillment:</p>
+    <ui>
+    {{ range .LineItems }}
+    <li>{{ .Qty }} - {{ .Size }}</li>
+    {{ end }}
+    </ui>
+{{ end }}

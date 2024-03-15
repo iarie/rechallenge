@@ -11,5 +11,10 @@ type LineItem struct {
 }
 
 type Order struct {
+	Requested int
 	LineItems []LineItem
+}
+
+func (o Order) NotEmpty() bool {
+	return len(o.LineItems) > 0
 }

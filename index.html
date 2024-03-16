@@ -9,8 +9,9 @@
 </head>
 <body>
     <div class="container mx-auto my-4 p-4 min-w-2">
-        <header class="my-4 p-4 bg-slate-950 shadow-md rounded-md">
-            <img src="https://assets-global.website-files.com/654bb9ab3f6840c86a329c76/65cb690a6d90f511898b067b_RE%20Partners%20Logo.2svg.svg" width="56">
+        <header class="grid grid-cols-2 my-4 p-4 bg-slate-950 shadow-md rounded-md">
+            <div><img src="https://assets-global.website-files.com/654bb9ab3f6840c86a329c76/65cb690a6d90f511898b067b_RE%20Partners%20Logo.2svg.svg" width="56"></div>
+            <div class="text-white text-right align-text-bottom text-sm">{{ .Version }}</div>
         </header>
         <div class="grid grid-cols-3 gap-3 bg-slate-50 p-4">
             <div class="w-128 p-4 border-slate-300 border">
@@ -24,7 +25,7 @@
                     </thead>
 
                     <tbody>
-                      {{ range . }}
+                      {{ range .Packages }}
                       <tr>
                         <td class="border border-slate-100">{{ .Sku }}</td>
                         <td class="border border-slate-100">{{ .Size }}</td>

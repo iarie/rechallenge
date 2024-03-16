@@ -5,8 +5,10 @@ import (
 	"html/template"
 	"log"
 	"net/http"
+	"os"
 	"strconv"
 
+	"github.com/iarie/rechallenge/data"
 	"github.com/iarie/rechallenge/internal"
 )
 
@@ -27,7 +29,17 @@ func indexHandler(inventoryRepo internal.Repository) func(w http.ResponseWriter,
 		w.Header().Set("X-Content-Type-Options", "nosniff")
 
 		tmpl := template.Must(template.ParseFiles("index.html"))
-		tmpl.Execute(w, inventoryRepo.Get())
+
+		data := struct {
+			Version  string
+			Packages []data.Package
+		}{
+			Version:  os.Getenv("APP_VERSION"),
+			Packages: inventoryRepo.Get(),
+		}
+
+		tmpl.Execute(w, data)
+
 	}
 }
 

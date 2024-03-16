@@ -169,5 +169,5 @@ func Benchmark(*testing.B) {
 
 	inventory := []data.Package{pack10, pack5, pack3}
 
-	internal.PackerV1(1_000_000, inventory)
+	internal.PackerV1(1_000_00, inventory)
 }

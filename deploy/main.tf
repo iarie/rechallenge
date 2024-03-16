@@ -10,6 +10,8 @@ variable "app_name" {
     default = "rechallenge"
 }
 
+variable "app_version" {}
+
 provider "aws" {
   profile = var.aws_profile
   region  = var.aws_region
@@ -101,7 +103,13 @@ resource "aws_ecs_task_definition" "re_task" {
           awslogs-region        = var.aws_region,
           awslogs-stream-prefix = var.app_name
         }
-      },
+      }
+      environment = [
+        {
+          name = "APP_VERSION"
+          value = var.app_version
+        }
+      ]
     }
   ])
 }

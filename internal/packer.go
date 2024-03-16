@@ -2,8 +2,7 @@ package internal
 
 import (
 	"errors"
-	"fmt"
-	"sort"
+	"math"
 
 	"github.com/iarie/rechallenge/data"
 )
@@ -32,65 +31,60 @@ func PackerV1(total int, packs []data.Package) (data.Order, error) {
 	}
 
 	// Shared var to aggregate solutions
-	mem := []Solution{}
+	mem := &Solution{Target: total, Score: [2]int{math.MinInt, math.MaxInt}}
 
 	// Initial empty solution
 	start := newSolution([]data.LineItem{}, total)
 
 	// Start search
-	recursionV1(start, total, packs, &mem)
-
-	// Rank results
-	sort.Sort(ByScore(mem))
-
-	fmt.Println("Permuations:", len(mem))
+	recursionV1(start, total, packs, mem)
 
 	// Build Order
-	o.LineItems = append(o.LineItems, mem[0].Items...)
+	o.LineItems = append(o.LineItems, mem.Items...)
 	return o, nil
 }
 
 // Search for permuations
-// Accept rolling solution node, remainder to fullfil, packs to iterate, and memo to store results
-func recursionV1(in Solution, remainder int, packs []data.Package, mem *[]Solution) {
-	// Algorithm assumes that packs slice is sorted by size (desc)
-	// Start from the biggest pack
-	for i, p := range packs {
+// Accept rolling solution node, remainder to fullfil, packs to iterate, and memo to store best
+func recursionV1(in Solution, remainder int, packs []data.Package, mem *Solution) {
+	if len(packs) == 0 {
+		return
+	}
 
-		// Calculate how many packs is needed to fulfill an order
-		// Assuming we have unlimited stock, otherwise we can limit q value
-		q := (remainder / p.Size)
+	// Shift biggest pack
+	p := packs[0]
 
-		// Check combinations starting with max fulfilling to 0 packs
-		for j := q + 1; j >= 0; j-- {
-			// Spawn new solution branch:
-			// copy rolling line items
-			pNext := make([]data.LineItem, len(in.Items))
-			copy(pNext, in.Items)
+	// Calculate how many packs needed to fulfill an order
+	q := (remainder / p.Size)
 
-			// Do not append null package
-			if j != 0 {
-				pNext = append(pNext, data.LineItem{Package: p, Qty: j})
-			}
-
-			// Clone stuct
-			sNext := newSolution(pNext, in.Target)
-
-			// Save solved solution & continue
-			if sNext.IsSolved() {
-				// call Finalize to assign the Score
-				sNext.Finalize()
-				*mem = append(*mem, sNext)
-
-				continue
-			}
-
-			// Calculate new remainder
-			newRemainder := remainder - p.Size*j
-
-			// Go to next smaller slice: packs[i+1:]
-			recursionV1(sNext, newRemainder, packs[i+1:], mem)
+	// Check combinations starting with max fulfilling to 1 packs
+	for j := q + 1; j >= 0; j-- {
+		// Spawn new branch solution
+		sNext := copySoltion(in)
+		if j != 0 {
+			sNext.Items = append(sNext.Items, data.LineItem{Package: p, Qty: j})
 		}
+
+		if sNext.IsSolved() {
+			// Call Finalize to assign the Score
+			sNext.Finalize()
+
+			// Save solved solution
+			if isBetterSolution(sNext, *mem) {
+				*mem = sNext
+			}
+		}
+
+		// if we have a precise solution skip branches with worse secondary score
+		if mem.Score[0] == 0 && len(sNext.Items) >= len(mem.Items) {
+			continue
+		}
+
+		// Calculate new remainder
+		newRemainder := remainder - p.Size*j
+
+		// Go to next smaller item and repeat
+		recursionV1(sNext, newRemainder, packs[1:], mem)
 	}
 }
 
@@ -124,24 +118,6 @@ func (s *Solution) IsSolved() bool {
 	return sc[0] <= 0
 }
 
-type ByScore []Solution
-
-func (a ByScore) Len() int {
-	return len(a)
-}
-
-func (a ByScore) Less(i, j int) bool {
-	if a[i].Score[0] == a[j].Score[0] {
-		return a[i].Score[1] < a[j].Score[1]
-	} else {
-		return a[i].Score[0] > a[j].Score[0]
-	}
-}
-
-func (a ByScore) Swap(i, j int) {
-	a[i], a[j] = a[j], a[i]
-}
-
 func getScore(items []data.LineItem, target int) [2]int {
 	var totalItems int
 	var totalPacks int
@@ -152,4 +128,20 @@ func getScore(items []data.LineItem, target int) [2]int {
 	}
 
 	return [2]int{target - totalItems, totalPacks}
+}
+
+func copySoltion(s Solution) Solution {
+	pNext := make([]data.LineItem, len(s.Items))
+	copy(pNext, s.Items)
+	return newSolution(pNext, s.Target)
+}
+
+func isBetterSolution(next, prev Solution) bool {
+	ns := next.Score
+	ps := prev.Score
+
+	if ns[0] == ps[0] {
+		return ns[1] < ps[1]
+	}
+	return ns[0] > ps[0]
 }

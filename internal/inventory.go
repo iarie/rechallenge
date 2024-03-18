@@ -19,7 +19,7 @@ type HardcodedInventoryRepo struct {
 func (r *HardcodedInventoryRepo) Get() []data.Package {
 	inv := r.Data
 
-	sort.Sort(bySize(inv))
+	sort.Sort(data.BySizeDesc(inv))
 
 	return inv
 }
@@ -40,18 +40,4 @@ func (r *HardcodedInventoryRepo) Delete(size int) error {
 
 	r.Data = append(r.Data[:indexToDelete], r.Data[indexToDelete+1:]...)
 	return nil
-}
-
-type bySize []data.Package
-
-func (a bySize) Len() int {
-	return len(a)
-}
-
-func (a bySize) Less(i, j int) bool {
-	return a[i].Size > a[j].Size
-}
-
-func (a bySize) Swap(i, j int) {
-	a[i], a[j] = a[j], a[i]
 }

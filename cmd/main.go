@@ -19,7 +19,7 @@ func main() {
 
 	cfg := app.NewConfig(
 		app.UsePort(80),
-		app.UsePacker("V1"),
+		app.UsePacker("V2"),
 		app.UseInventoryRepo(repo),
 	)
 

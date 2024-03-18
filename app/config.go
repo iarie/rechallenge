@@ -56,6 +56,8 @@ func getPackerFuncByVersion(v string) func(int, []data.Package) (data.Order, err
 	switch v {
 	case "V1":
 		return internal.PackerV1
+	case "V2":
+		return internal.PackerV2
 	default:
 		panic(fmt.Sprintf("Unknown Packer version %v", v))
 	}

@@ -145,6 +145,21 @@ func TestPackerV2_PrimalPacks(t *testing.T) {
 				{Package: pack3, Qty: 1},
 			},
 		}},
+		{1256, data.Order{
+			Requested: 1256,
+			LineItems: []data.LineItem{
+				{Package: pack17, Qty: 73},
+				{Package: pack5, Qty: 3},
+			},
+		}},
+		{1_000_000, data.Order{
+			Requested: 1_000_000,
+			LineItems: []data.LineItem{
+				{Package: pack17, Qty: 58822},
+				{Package: pack7, Qty: 3},
+				{Package: pack5, Qty: 1},
+			},
+		}},
 	}
 
 	for i, test := range cases {
